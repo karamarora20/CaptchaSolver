@@ -5,15 +5,14 @@ import { useState } from 'react';
 
 function App() {
 const [value,setvalue]= useState("");
-let answer="";
+const[answer,setanswer]= useState("")
 
 async function get_answer(val){
-let host="https://localhost:4000/"
-let img_link= host+"solve/"+val
-fetch(img_link).then(result=>result.text()).then(function (data){
-  answer=data;
-})
-}
+  // console.log(val);
+fetch( `http://127.0.0.1:4000/solve/${val}`,{
+  mode:"no-cors"
+}).then(result=>result.json()).then(data=> setanswer(data))}
+console.log(`answer="${answer}"`)
   return (
   
     <div className="App">
@@ -22,8 +21,8 @@ fetch(img_link).then(result=>result.text()).then(function (data){
      value={value}
      onChange={e => setvalue(e.target.value)} />
      <button onClick={() => { get_answer(value);}}> Enter </button>
-        <label htmlFor="answer"> Link</label>
-     <input type="text" name="answer" id="answer" className={"link-box"} />
+        <label htmlFor="ans"> Link</label>
+     <input type="text" name="ans" id="ans" className={"link-box"} />
  
     </div>
 
