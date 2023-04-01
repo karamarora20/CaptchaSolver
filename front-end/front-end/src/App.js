@@ -1,4 +1,4 @@
-import logo from './logo.svg';
+
 import './App.css';
 import { useState } from 'react';
 
@@ -9,9 +9,16 @@ const[answer,setanswer]= useState("")
 
 async function get_answer(val){
   // console.log(val);
-fetch( `http://127.0.0.1:4000/solve/${val}`,{
-  mode:"no-cors"
-}).then(result=>result.json()).then(data=> setanswer(data))}
+  const result= await fetch('http://localhost:4000/solve',{
+    method:"POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      image:val
+    })  
+})
+ const data= await result.json();
+ setanswer(data.hel);
+}
 console.log(`answer="${answer}"`)
   return (
   
@@ -21,8 +28,8 @@ console.log(`answer="${answer}"`)
      value={value}
      onChange={e => setvalue(e.target.value)} />
      <button onClick={() => { get_answer(value);}}> Enter </button>
-        <label htmlFor="ans"> Link</label>
-     <input type="text" name="ans" id="ans" className={"link-box"} />
+        <label htmlFor="ans"> answer</label>
+     <input type="text" name="ans" id="ans" className={"link-box"} value={answer}  />
  
     </div>
 

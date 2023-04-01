@@ -1,24 +1,46 @@
 
 const express= require('express');
 const app = express();
-const tesseract= require('tesseract.js')
+const Tesseract= require('tesseract.js')
 const sharp= require('sharp')
 const cors= require('cors')
-// setting
-let image_link="";
-app.set("port", 4000);
-app.get("/solve/:input",function(req,res){
-    let response= {image_link :req.params.input}
-    res.send(response);
-    console.log("got a solve request")
-})
-console.log(image_link)
+const https = require('https');
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
-app.get('/:name/:lastname',function(req,res){
-res.send(`<p><b>hello</b> <i>world</i></p><br><p> name: ${req.params.name}<br> last: ${req.params.lastname}</p>`);
-});
+// setting
+async function solve_image(url) {
+    return new Promise((resolve, reject) => {
+      https.get(url, (res) => {
+        const contentType = res.headers['content-type'];
+        let rawData = [];
+        res.on('data', (chunk) => {
+          rawData.push(chunk);
+        });
+        res.on('end', async () => {
+          rawData = Buffer.concat(rawData);
+          const preprocessedImage = await sharp(rawData)
+            .grayscale()
+            .toBuffer();
+          const result = await Tesseract.recognize(preprocessedImage);
+          resolve(result.text);
+        });
+      }).on('error', (e) => {
+        reject(`Error downloading image: ${e.message}`);
+      });
+    });
+  }
+app.set("port", 4000);
+app.post("/solve",function(req,res){
+    const {image}=req.body
+    console.log(`got a solve request for ${image}`)
+ solve_image(image).then((text)=>{
+    console.log(text);
+    res.send({"hel":text})});
+})
+
 
 app.listen(app.get("port"));
 
